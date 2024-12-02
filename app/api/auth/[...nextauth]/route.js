@@ -78,6 +78,7 @@ const handler = NextAuth({
         // check if user already exists
         const userExists = await User.findOne({ email: profile.email });
         console.log(userExists);
+        const email = profile.email;
         if (!userExists) {
           // If not, create a new document and save user in MongoDB
           const newCode = generateCode();
@@ -91,7 +92,8 @@ const handler = NextAuth({
 
           console.log("The email", profile.email);
           await SendMessage(profile.email, newCode);
-          return "/verify-email";
+
+          return `/verify-email/${email}`;
         } else if (!userExists.verifiedViaEmail) {
           // If the email is not verified, generate a new code and send it
           const newCode = generateCode();
@@ -99,7 +101,7 @@ const handler = NextAuth({
           await userExists.save();
           console.log("The email", userExists.email);
           await SendMessage(userExists.email, newCode);
-          return "/verify-email";
+          return `/verify-email/${email}`;
         }
 
         return true;

@@ -1,46 +1,41 @@
 "use client";
 
-import { useRouter } from "@node_modules/next/navigation";
-import axios from "axios";
+import { useSession } from "@node_modules/next-auth/react";
 import React, { useState } from "react";
 
-const EmailVerification = () => {
+const EmailVerification = ({ email }) => {
   const [code, setCode] = useState("");
-  const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [isVerified, setIsVerified] = useState(false);
-  const router = useRouter();
 
   const handleChange = (event) => {
     setCode(event.target.value);
   };
 
-  const handleEmailChange = (event) => {
-    setEmail(event.target.value);
-  };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log("Sending verification request...");
+    console.log("Sending verification request... to", email);
 
     try {
-      const res = await axios.post(
-        "http://localhost:8080/verify-code",
-        {},
-        {
-          headers: {
-            email,
-            code,
-          },
-        }
-      );
+      const res = await fetch("/api/verify-code", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          code,
+          email,
+        }),
+      });
 
-      if (res.data.data === "verified") {
+      const data = await res.json();
+
+      if (res.ok) {
         setIsVerified(true);
         setError(""); // Clear errors
         setTimeout(() => router.push("/"), 1000);
       } else {
-        setError("Invalid verification code.");
+        setError(data.message || "Invalid verification code.");
       }
     } catch (error) {
       console.error("Error during verification:", error);
@@ -51,20 +46,13 @@ const EmailVerification = () => {
   return (
     <div className="flex flex-col items-center justify-center bg-transparent p-4">
       <h1 className="text-2xl font-bold text-center mb-6">
-        Enter the email and 4-digit verification code
+        Enter the 4-digit verification code
       </h1>
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-sm p-6 bg-white rounded-lg shadow-lg"
       >
         <div className="mb-4">
-          <input
-            type="email"
-            value={email}
-            onChange={handleEmailChange}
-            placeholder="Email"
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
-          />
           <input
             type="text"
             value={code}
