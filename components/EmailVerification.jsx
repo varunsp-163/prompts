@@ -1,13 +1,14 @@
 "use client";
 
 import { useSession } from "@node_modules/next-auth/react";
+import { useRouter } from "@node_modules/next/navigation";
 import React, { useState } from "react";
 
 const EmailVerification = ({ email }) => {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [isVerified, setIsVerified] = useState(false);
-
+  const router = useRouter();
   const handleChange = (event) => {
     setCode(event.target.value);
   };
