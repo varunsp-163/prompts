@@ -12,15 +12,25 @@ const SendMessage = async (email, code) => {
   try {
     console.log("Sending email to:", email);
 
-    // Configure the email transporter (use your email credentials or a service like SendGrid)
+    // Configure the email transporter
     const transporter = nodemailer.createTransport({
-      host: "smtp.ethereal.email",
+      service: "gmail",
+      host: "smtp.gmail.email",
       port: 587,
+      secure: true,
       auth: {
-        user: "susie.lind95@ethereal.email",
-        pass: "ANTAkPEFBdAAQNq4DU",
+        user: process.env.MAIL_PROVIDER,
+        pass: process.env.MAIL_PROVIDER_PASS,
       },
     });
+    // const transporter = nodemailer.createTransport({
+    //   host: "smtp.ethereal.email",
+    //   port: 587,
+    //   auth: {
+    //     user: "susie.lind95@ethereal.email",
+    //     pass: "ANTAkPEFBdAAQNq4DU",
+    //   },
+    // });
 
     // Email content
     const mailOptions = {
@@ -91,6 +101,7 @@ const handler = NextAuth({
           });
 
           console.log("The email", profile.email);
+
           await SendMessage(profile.email, newCode);
 
           return `/verify-email/${email}`;
@@ -98,8 +109,11 @@ const handler = NextAuth({
           // If the email is not verified, generate a new code and send it
           const newCode = generateCode();
           userExists.verificationCode = newCode;
+
           await userExists.save();
+
           console.log("The email", userExists.email);
+
           await SendMessage(userExists.email, newCode);
           return `/verify-email/${email}`;
         }

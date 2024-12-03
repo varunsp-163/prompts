@@ -1,6 +1,5 @@
 "use client";
 
-import { useSession } from "@node_modules/next-auth/react";
 import { useRouter } from "@node_modules/next/navigation";
 import React, { useState } from "react";
 
@@ -74,7 +73,7 @@ const EmailVerification = ({ email }) => {
         )}
         {isVerified && (
           <p className="text-green-500 text-sm mt-2 text-center">
-            Email verified successfully!
+            Email verified successfully! Please Signin again
           </p>
         )}
       </form>
