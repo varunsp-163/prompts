@@ -1,13 +1,17 @@
 "use client";
 
-import { useRouter } from "@node_modules/next/navigation";
+import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 const EmailVerification = ({ email }) => {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [isVerified, setIsVerified] = useState(false);
+  const [attempts, setAttempts] = useState(0);
+  const maxAttempts = 3;
   const router = useRouter();
+
   const handleChange = (event) => {
     setCode(event.target.value);
   };
@@ -32,14 +36,29 @@ const EmailVerification = ({ email }) => {
 
       if (res.ok) {
         setIsVerified(true);
-        setError(""); // Clear errors
-        setTimeout(() => router.push("/"), 1000);
+        setError("");
+        console.log("Verification successful, logging in...");
+        setTimeout(() => router.push("/"), 500);
       } else {
+        setAttempts((prevAttempts) => prevAttempts + 1);
         setError(data.message || "Invalid verification code.");
+
+        if (attempts + 1 >= maxAttempts) {
+          setTimeout(() => {
+            signOut({ callbackUrl: "/" });
+            alert(
+              "You have reached the maximum attempts. You have been logged out."
+            );
+          }, 500);
+        }
       }
     } catch (error) {
       console.error("Error during verification:", error);
       setError("An error occurred. Please try again.");
+      setTimeout(() => {
+        signOut({ callbackUrl: "/" });
+        alert("You have been logged out.");
+      }, 500);
     }
   };
 
@@ -73,9 +92,16 @@ const EmailVerification = ({ email }) => {
         )}
         {isVerified && (
           <p className="text-green-500 text-sm mt-2 text-center">
-            Email verified successfully! Please Signin again
+            Email verified successfully! Logging you in...
           </p>
         )}
+        <div className="mt-4 text-center">
+          {attempts < maxAttempts && (
+            <p className="text-sm text-gray-500">
+              {maxAttempts - attempts} attempt(s) left
+            </p>
+          )}
+        </div>
       </form>
     </div>
   );

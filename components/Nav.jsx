@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { signIn, signOut, useSession, getProviders } from "next-auth/react";
@@ -10,6 +11,7 @@ const Nav = () => {
 
   const [providers, setProviders] = useState(null);
   const [toggleDropdown, setToggleDropdown] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     (async () => {
@@ -17,6 +19,10 @@ const Nav = () => {
       setProviders(res);
     })();
   }, []);
+
+  const handleSignIn = (id) => {
+    signIn(id, { callbackUrl: "/verify-email" });
+  };
 
   return (
     <nav className="flex-between w-full mb-16 pt-3">
@@ -61,7 +67,7 @@ const Nav = () => {
                   type="button"
                   key={provider.name}
                   onClick={() => {
-                    signIn(provider.id);
+                    handleSignIn(provider.id);
                   }}
                   className="black_btn"
                 >
@@ -122,7 +128,7 @@ const Nav = () => {
                   type="button"
                   key={provider.name}
                   onClick={() => {
-                    signIn(provider.id);
+                    handleSignIn(provider.id);
                   }}
                   className="black_btn"
                 >
