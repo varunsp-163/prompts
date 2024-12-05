@@ -24,6 +24,30 @@ const Nav = () => {
     signIn(id, { callbackUrl: "/verify-email" });
   };
 
+  const handleSession = async () => {
+    if (session) {
+      try {
+        const res = await fetch("/api/signout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: session.user.email,
+          }),
+        });
+        if (res.ok) {
+          console.log("Sign-out activity logged successfully.");
+          await signOut();
+        } else {
+          console.error("Failed to log sign-out activity.");
+        }
+      } catch (error) {
+        console.error("Error logging sign-out activity:", error);
+      }
+    }
+  };
+
   return (
     <nav className="flex-between w-full mb-16 pt-3">
       <Link href="/" className="flex gap-2 flex-center">
@@ -45,7 +69,13 @@ const Nav = () => {
               Create Post
             </Link>
 
-            <button type="button" onClick={signOut} className="outline_btn">
+            <button
+              type="button"
+              onClick={() => {
+                handleSession();
+              }}
+              className="outline_btn"
+            >
               Sign Out
             </button>
 
@@ -111,7 +141,7 @@ const Nav = () => {
                   type="button"
                   onClick={() => {
                     setToggleDropdown(false);
-                    signOut();
+                    handleSession();
                   }}
                   className="mt-5 w-full black_btn"
                 >

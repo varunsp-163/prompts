@@ -76,7 +76,6 @@ const getClientIp = () => {
 };
 
 const isValidSession = async (user) => {
-  
   const latestSession = await LoginActivity.find({
     userId: user._id,
   })
@@ -91,7 +90,7 @@ const isValidSession = async (user) => {
   const sessionCreatedAt = new Date(latestSession[0].createdAt);
 
   if (currentTime - sessionCreatedAt <= 10 * 60 * 1000) {
-    if (latestSession[0].status === "otp verification needed") {
+    if (latestSession[0].status !== "Signout successful") {
       return false;
     }
   }
@@ -129,7 +128,7 @@ const handler = NextAuth({
 
           if (!sessionIsValid) {
             console.log("Session invalid, OTP required.");
-            return false;
+            return "/active-session";
           }
 
           userExists.verificationCode = await hashCode(newCode);

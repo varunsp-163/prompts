@@ -27,17 +27,19 @@ export const POST = async (request) => {
 
     const latestSession = await LoginActivity.find({ userId: user._id })
       .sort({ createdAt: -1 })
-      .limit(1);
+      .limit(2);
 
     console.log("The last session:", latestSession);
 
     if (latestSession.length > 0 && user.verifiedViaEmail) {
       const currentTime = new Date();
       const sessionCreatedAt = new Date(latestSession[0].createdAt);
-      console.log(currentTime - sessionCreatedAt);
 
       if (currentTime - sessionCreatedAt <= 10 * 60 * 1000) {
-        if (latestSession[0].status === "otp verification needed") {
+        if (
+          latestSession[0].status === "otp verification needed" &&
+          latestSession[1].status === "success"
+        ) {
           return new Response(
             JSON.stringify({
               message: "There is an active session, please try later",
